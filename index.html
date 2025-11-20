@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sleep Stress Level Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h2>Sleep Stress Level Predictor</h2>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Input Section -->
+            <section class="input-section card">
+                <h3>Enter Sleep Parameters</h3>
+                <form id="predictionForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="snoring">Snoring Rate</label>
+                            <input type="number" id="snoring" name="snoring" step="0.01" required>
+                            <span class="help-text">Range: 0-100</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="respiration">Respiration Rate</label>
+                            <input type="number" id="respiration" name="respiration" step="0.01" required>
+                            <span class="help-text">Breaths per minute</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="temperature">Body Temperature (°F)</label>
+                            <input type="number" id="temperature" name="temperature" step="0.01" required>
+                            <span class="help-text">Normal: 97-99°F</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="limb">Limb Movement</label>
+                            <input type="number" id="limb" name="limb" step="0.01" required>
+                            <span class="help-text">Movements per hour</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="oxygen">Blood Oxygen (%)</label>
+                            <input type="number" id="oxygen" name="oxygen" step="0.01" required>
+                            <span class="help-text">Normal: 95-100%</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="eye">Eye Movement (REM)</label>
+                            <input type="number" id="eye" name="eye" step="0.01" required>
+                            <span class="help-text">REM cycles</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="hours">Sleeping Hours</label>
+                            <input type="number" id="hours" name="hours" step="0.01" required>
+                            <span class="help-text">Total hours of sleep</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="heart">Heart Rate (BPM)</label>
+                            <input type="number" id="heart" name="heart" step="0.01" required>
+                            <span class="help-text">Beats per minute</span>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Predict Stress Level</button>
+                </form>
+            </section>
+
+            <!-- Results Section -->
+            <section id="results" class="results-section" style="display: none;">
+                <div class="results-grid">
+                    <div class="card result-card">
+                        <h3>Decision Tree Prediction</h3>
+                        <div class="stress-level" id="dtResult">-</div>
+                        <div class="stress-label" id="dtLabel">-</div>
+                    </div>
+                    <div class="card result-card">
+                        <h3>Random Forest Prediction</h3>
+                        <div class="stress-level" id="rfResult">-</div>
+                        <div class="stress-label" id="rfLabel">-</div>
+                    </div>
+                    <div class="card result-card">
+                        <h3>Average Prediction</h3>
+                        <div class="stress-level" id="avgResult">-</div>
+                        <div class="stress-label" id="avgLabel">-</div>
+                    </div>
+                    <div class="card result-card">
+                        <h3>Confidence Score</h3>
+                        <div class="confidence-score" id="confidence">-</div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="confidenceFill"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Visualizations Section -->
+            <section class="visualizations-section">
+                <h2>Model Performance Analytics</h2>
+                
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab-button active" onclick="showTab('metrics')">Performance Metrics</button>
+                    <button class="tab-button" onclick="showTab('confusion')">Confusion Matrix</button>
+                    <button class="tab-button" onclick="showTab('heatmap')">Feature Correlation</button>
+                    <button class="tab-button" onclick="showTab('distribution')">Stress Distribution</button>
+                </div>
+
+                <!-- Tab Content -->
+                <div id="metrics" class="tab-content active">
+                    <div class="metrics-grid">
+                        <div class="card metric-card">
+                            <h4>Decision Tree Metrics</h4>
+                            <canvas id="dtMetricsChart"></canvas>
+                        </div>
+                        <div class="card metric-card">
+                            <h4>Random Forest Metrics</h4>
+                            <canvas id="rfMetricsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="confusion" class="tab-content">
+                    <div class="confusion-grid">
+                        <div class="card">
+                            <h4>Decision Tree Confusion Matrix</h4>
+                            <div id="dtConfusionMatrix"></div>
+                        </div>
+                        <div class="card">
+                            <h4>Random Forest Confusion Matrix</h4>
+                            <div id="rfConfusionMatrix"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="heatmap" class="tab-content">
+                    <div class="card">
+                        <h4>Feature Correlation Heatmap</h4>
+                        <div id="correlationHeatmap"></div>
+                    </div>
+                </div>
+
+                <div id="distribution" class="tab-content">
+                    <div class="card">
+                        <h4>Stress Level Distribution</h4>
+                        <canvas id="distributionChart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 Sleep Stress Level Predictor. Built with Machine Learning.</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
